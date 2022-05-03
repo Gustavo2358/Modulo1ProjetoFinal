@@ -8,6 +8,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
+        //TODO:Tamanho da matriz está fixa. Implementar o método para aumentar linhas.
         Object[][] tabelaProdutos = new Object[10][9];
 
 
@@ -17,7 +18,7 @@ public class Main {
 
             switch (opcao) {
                 case 1:
-                    cadastrarComprar(receberInput(sc));
+                    cadastrarComprar(receberInput(sc), tabelaProdutos);
                     break;
                 case 2:
                     imprimirEstoque();
@@ -29,14 +30,34 @@ public class Main {
         }
     }
 
-    private static void cadastrarComprar(Object[] inputs) {
-        System.out.println("TODO: implementar método cadastrarComprar");
-        for(Object produto : inputs){
-            System.out.println(produto);
+    private static void cadastrarComprar(Object[] inputs, Object[][] tabelaProdutos) {
+        //TODO: implementar
+
+        //metodo para checar se o produto está na tabela, caso sim, efetuar operação de compra
+        // caso nao, cadastrar novo produto;
+        //produtoEstaNaTabela();
+
+
+    }
+
+    private static boolean produtoEstaNaTabela(Object[] inputs, Object[][] tabelaProdutos) {
+        String nome = (String) inputs[3];
+        String identificador = (String) inputs[2];
+        String marca = (String) inputs[1];
+        String nomeTabela  = "", identificadorTabela="", marcaTabela = "";
+
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            nomeTabela = (String) tabelaProdutos[i][3];
+            identificadorTabela = (String) tabelaProdutos[i][2];
+            marcaTabela = (String) tabelaProdutos[i][1];
+            if(tabelaProdutos[i][3] != null
+                    && nomeTabela.equals(nome)
+                    && identificadorTabela.equals(identificador)
+                    && marcaTabela.equals(marca)){
+                return true;
+            }
         }
-
-
-
+        return false;
     }
 
     private static Object[] receberInput(Scanner sc) {
@@ -107,12 +128,12 @@ public class Main {
     }
 
     private static void listarProdutos() {
-        System.out.println("TODO: implementar método listarProdutos");
+        //TODO: Implementar
 
     }
 
     private static void imprimirEstoque() {
-        System.out.println("TODO: implementar método imprimirEstoque");
+        //TODO: Implementar
     }
 
     public static int menu(Scanner sc){
@@ -146,4 +167,6 @@ enum Tipo {
     Tipo(double markup) {
         this.markup = markup;
     }
+
+    //TODO: implementdar cálculo de preço usando markup
 }
