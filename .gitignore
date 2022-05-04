@@ -1,3 +1,4 @@
 .idea
+/out/
 Modulo1ProjetoFinal.iml
-/src/com/letscode/teste/Teste.java
+/src/teste/Teste.java
