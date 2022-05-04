@@ -157,16 +157,3 @@ public class Main {
     }
 }
 
-enum Tipo {
-    ALIMENTOS(1.2),
-    BEBIDA(2.3),
-    HIGIENE(1.5);
-
-    private double markup;
-
-    Tipo(double markup) {
-        this.markup = markup;
-    }
-
-    //TODO: implementdar cálculo de preço usando markup
-}
