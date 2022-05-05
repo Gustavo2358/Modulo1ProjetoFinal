@@ -1,6 +1,7 @@
 package com.letscode.project;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
@@ -229,6 +230,7 @@ public class Main {
         System.out.println("+");
 
         //produtos
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         if(tipo != null){
             listarProdutosTipo(tipo);
         }else {
@@ -236,8 +238,16 @@ public class Main {
             for (int i = 0; i < tabelaProdutos.length; i++) {
 
                 for (int j = 0; j < tabelaProdutos[0].length; j++) {
-                    if (tabelaProdutos[i][j] != null) System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
-                    else break first;
+                    if(j == 6){
+                        LocalDateTime date = (LocalDateTime) tabelaProdutos[i][j];
+                        System.out.printf("| %-27s", formatter.format(date));
+                    }else if(j == 7){
+                        System.out.printf("| %-27.2f", tabelaProdutos[i][j]);
+                    }else if (tabelaProdutos[i][j] != null) {
+                        System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
+                    } else{
+                        break first;
+                    }
                 }
                 System.out.println("|");
             }
@@ -288,7 +298,7 @@ public class Main {
         Object[][] novaMatriz = new Object [matriz.length * 2][QTD_COLUNAS];
 
         for (int i = 0; i < matriz.length; i++) {
-            for (int j = 0; j < tabelaProdutos.length; j++) {
+            for (int j = 0; j < tabelaProdutos[0].length; j++) {
                 novaMatriz[i][j] = matriz[i][j];
             }
 
@@ -311,7 +321,6 @@ enum Tipo {
         this.markup = markup;
     }
 
-    //TODO: implementdar cálculo de preço usando markup
     public double calcularPreco(double precoCusto){
         return this.markup * precoCusto;
     }
