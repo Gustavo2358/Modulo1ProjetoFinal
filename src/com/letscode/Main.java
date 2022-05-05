@@ -1,6 +1,7 @@
 package com.letscode;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
@@ -45,7 +46,7 @@ public class Main {
 
             switch (opcao) {
                 case 1:
-                    cadastrarComprar(receberInput(sc), tabelaProdutos);
+                    tabelaProdutos = cadastrarComprar(receberInput(sc), tabelaProdutos);
                     break;
                 case 2:
                     imprimirEstoque(tabelaProdutos,null);
@@ -59,19 +60,19 @@ public class Main {
         }
     }
 
-    private static void cadastrarComprar(Object[] inputs, Object[][] tabelaProdutos) {
+    private static Object[][] cadastrarComprar(Object[] inputs, Object[][] tabelaProdutos) {
         int linhaTabela = produtoEstaNaTabela(inputs, tabelaProdutos);
         if( linhaTabela < 0){
             cadastrarNovoProduto(inputs, tabelaProdutos);
-            if( tabelaProdutos[tabelaProdutos.length - 1] != null){
+            if( tabelaProdutos[tabelaProdutos.length - 1][0] != null){
                 tabelaProdutos = aumentarMatriz(tabelaProdutos);
                 System.out.printf("A tabela foi redimensionada, agora ela possui a capacidade de" +
                         " %d linhas.%n", tabelaProdutos.length);
             }
-            return;
+            return tabelaProdutos;
         }
         comprar(inputs, tabelaProdutos, linhaTabela);
-
+        return tabelaProdutos;
     }
 
     private static void comprar(Object[] inputs, Object[][] tabelaProdutos, int linhaTabela) {
@@ -228,6 +229,7 @@ public class Main {
         System.out.println("+");
 
         //produtos
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         if(tipo != null){
             listarProdutosTipo(tabelaProdutos, tipo);
         }else {
@@ -235,8 +237,16 @@ public class Main {
             for (int i = 0; i < tabelaProdutos.length; i++) {
 
                 for (int j = 0; j < tabelaProdutos[0].length; j++) {
-                    if (tabelaProdutos[i][j] != null) System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
-                    else break first;
+                    if(j == 6){
+                        LocalDateTime date = (LocalDateTime) tabelaProdutos[i][j];
+                        System.out.printf("| %-27s", formatter.format(date));
+                    }else if(j == 7){
+                        System.out.printf("| %-27.2f", tabelaProdutos[i][j]);
+                    }else if (tabelaProdutos[i][j] != null) {
+                        System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
+                    } else{
+                        break first;
+                    }
                 }
                 System.out.println("|");
             }
@@ -292,6 +302,8 @@ public class Main {
 
         return novaMatriz;
     }
+
+
 
 }
 
