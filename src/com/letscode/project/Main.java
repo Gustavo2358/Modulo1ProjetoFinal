@@ -24,8 +24,6 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-
-
         //fake mock data
         tabelaProdutos[0] = new Object[]{Tipo.ALIMENTOS,
                 "Nestle",
@@ -70,9 +68,12 @@ public class Main {
                     break;
                 case 4:
                     System.out.println("Digite o código:");
-                    //TODO: implementar validações
                     String id = sc.nextLine();
                     imprimirEstoque(null, id, null);
+                case 5:
+                    System.out.println("Digite o nome ou parte dele: ");
+                    String nome = sc.nextLine();
+                    imprimirEstoque(null,null,nome);
             }
         }
     }
@@ -253,7 +254,9 @@ public class Main {
         }else if(id != null){
           listarProdutosId(id);
 
-        } else { //listar todos os produtos
+        } else if(nome != null){
+            listarProdutosNome(nome);
+        }else { //listar todos os produtos
             listarTudo();
         }
         //linha final
@@ -262,6 +265,19 @@ public class Main {
         }
         System.out.println("+");
 
+    }
+
+    private static void listarProdutosNome(String nome) {
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            String nomeTabela = (String) tabelaProdutos[i][3];
+            try {
+                if (nomeTabela.contains(nome)) {
+                    imprimeProdutos(i);
+                }
+            }catch (NullPointerException e){
+                return;
+            }
+        }
     }
 
     private static void listarProdutosId(String id) {
@@ -316,12 +332,13 @@ public class Main {
     }
 
     public static int menu(Scanner sc){
-        int opcaoMaxima = 4;
+        int opcaoMaxima = 5;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
         System.out.println("3 - Listar os produto pelo Tipo");
         System.out.println("4 - Pesquisar um produto pelo código");
+        System.out.println("5 - Pesquisar um produto pelo nome");
         int opcao = 0;
         do {
             try {
