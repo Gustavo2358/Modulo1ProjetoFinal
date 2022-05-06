@@ -9,10 +9,7 @@ public class Main {
 
     public static final int QTD_COLUNAS = 9;
     public static final int QTD_LINHAS = 4;
-    public static final int QTD_COLUNASV = 4;
-    public static final int QTD_LINHASV = 4;
     public static Object[][] tabelaProdutos = new Object[QTD_LINHAS][QTD_COLUNAS];
-    public static Object[][] tabelaVendas = new Object[QTD_LINHASV][QTD_COLUNASV];
     /*
     0 Tipo
 	1 Marca
@@ -57,12 +54,6 @@ public class Main {
                 TipoProduto.HIGIENE.calcularPreco(12.00),
                 200};
 
-                tabelaVendas[0] = new Object[]{TipoCliente.PF,
-                "000.000.001-01",
-                2,
-                15.50
-                };
-
         while(true) {
 
             int opcao = menu(sc);
@@ -91,9 +82,6 @@ public class Main {
                     break;
                 case 6:
                     venda(sc);
-                case 7:
-                    imprimirVendas(null,null,0, 0);
-
                     break;
             }
         }
@@ -352,32 +340,8 @@ public class Main {
 
     }
 
-    private static void imprimirVendas(TipoCliente tipo, String CPF, int qtdProduto, double total) {
-        //cabeçalho
-        for (int k = 0; k < tabelaVendas[0].length; k++) {
-            System.out.print("+----------------------------");
-        }
-        System.out.println("+");
-        String[] tableLabels = {"CPF","TIPO DE CLIENTE","QUANTIDADE VENDIDA","PREÇO DA VENDA"};
-        for (String tableLabel : tableLabels) {
-            System.out.printf("| %-27s", tableLabel);
-        }
-        System.out.println("|");
-
-        for (int k = 0; k < tabelaVendas[0].length; k++) {
-            System.out.print("+----------------------------");
-        }
-        System.out.println("+");
-        //linha final
-        for (int k = 0; k < tabelaVendas[0].length; k++) {
-            System.out.print("+----------------------------");
-        }
-        System.out.println("+");
-
-    }
-
     public static int menu(Scanner sc){
-        int opcaoMaxima = 7;
+        int opcaoMaxima = 6;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
@@ -385,7 +349,6 @@ public class Main {
         System.out.println("4 - Pesquisar um produto pelo código");
         System.out.println("5 - Pesquisar um produto pelo nome");
         System.out.println("6 - Efetuar venda");
-        System.out.println("7 - Relatório de vendas análitico");
         int opcao = 0;
         do {
             try {
@@ -414,19 +377,6 @@ public class Main {
         return novaMatriz;
     }
 
-    public static Object[][] aumentarVendas(Object[][] matriz){
-        Object[][] novaVendas = new Object [matriz.length * 2][QTD_COLUNAS];
-
-        for (int i = 0; i < matriz.length; i++) {
-            for (int j = 0; j < tabelaVendas[0].length; j++) {
-                novaVendas[i][j] = matriz[i][j];
-            }
-
-        }
-
-        return novaVendas;
-    }
-
     private static void venda(Scanner sc) {
         Object[] venda = new Object[4];
         String CPF = receberCPF(sc);
@@ -447,9 +397,7 @@ public class Main {
 
         imprimirResumo(resumo,sc);
         double valorTotal = calcularValorTotal(resumo);
-        TipoCliente tipo = (TipoCliente) venda[1];
-        double valorDescontado = valorTotal - tipo.valorDescontar(valorTotal);
-        System.out.printf("Valor Total: %.2f%n", valorTotal);
+//        System.out.println("Valor Total: %.2f%n", valorTotal);
         String enter;
         do{
             System.out.println("digite ENTER para voltar para o menu principal");
@@ -460,16 +408,8 @@ public class Main {
     }
 
     private static double calcularValorTotal(Object[][] resumo) {
-        double soma = 0;
-        for (int i = 0; i < resumo.length; i++) {
-            try {
-                soma += (double) resumo[i][4];
-            }
-            catch(NullPointerException e){
-                return soma;
-            }
-        }
-        return soma;
+        //TODO implementar calcular valor total
+        return 0;
     }
 
     private static void imprimirResumo(Object[][] resumo, Scanner sc) {
@@ -514,11 +454,11 @@ public class Main {
 
     private static Object[][] efetuarVenda(Object[] venda, Scanner sc) {
         //Codigo | Nome | Quantidade | Preco | ValorPagar
-        Object[][] resumo = new Object[1][5];
+        Object[][] resumo = new Object[10][5];
         int qtd = 0;
         int contagemProduto = 0;
         while(true) {
-            System.out.println("Digite o código do produto | Ou escreva FIM para encerrar: ");
+            System.out.println("Digite o código do produto: ");
             String codigo = sc.nextLine();
             if(codigo.equalsIgnoreCase("FIM")) break;
             Object[] produto = buscarProduto(codigo);
@@ -542,8 +482,7 @@ public class Main {
                 }
             }
 
-            int estoqueAntigo = (int) tabelaProdutos[buscarIndice(codigo)][8];
-            tabelaProdutos[buscarIndice(codigo)][8] = estoqueAntigo - qtd;
+            //TODO: diminuir quantidade em estoque
             Object[] linhaResumo = new Object[5];
             linhaResumo[0] = codigo;
             linhaResumo[1] = produto[3];
@@ -552,31 +491,13 @@ public class Main {
             linhaResumo[3] = preco;
             linhaResumo[4] = preco * qtd;
             resumo[contagemProduto] = linhaResumo;
+            //TODO: aumentar matriz quando chegar na capacidade máxima
             contagemProduto++;
-            if (contagemProduto == resumo.length){
-                resumo = aumentarVendas(resumo);
-                System.out.println(resumo.length);
-            }
-
             qtd = 0;
         }
 
 
         return resumo;
-    }
-
-    private static int buscarIndice(String codigo) {
-        for (int i = 0; i < tabelaProdutos.length; i++) {
-            String codigoTabela = (String) tabelaProdutos[i][2];
-            try {
-                if (codigoTabela.equals(codigo)) {
-                    return i;
-                }
-            }catch (NullPointerException e){
-                return -1;
-            }
-        }
-        return -1;
     }
 
     private static Object[] buscarProduto(String codigo) {
