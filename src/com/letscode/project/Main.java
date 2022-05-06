@@ -447,7 +447,9 @@ public class Main {
 
         imprimirResumo(resumo,sc);
         double valorTotal = calcularValorTotal(resumo);
-//        System.out.println("Valor Total: %.2f%n", valorTotal);
+        TipoCliente tipo = (TipoCliente) venda[1];
+        double valorDescontado = valorTotal - tipo.valorDescontar(valorTotal);
+        System.out.printf("Valor Total: %.2f%n", valorTotal);
         String enter;
         do{
             System.out.println("digite ENTER para voltar para o menu principal");
@@ -458,8 +460,16 @@ public class Main {
     }
 
     private static double calcularValorTotal(Object[][] resumo) {
-        //TODO implementar calcular valor total
-        return 0;
+        double soma = 0;
+        for (int i = 0; i < resumo.length; i++) {
+            try {
+                soma += (double) resumo[i][4];
+            }
+            catch(NullPointerException e){
+                return soma;
+            }
+        }
+        return soma;
     }
 
     private static void imprimirResumo(Object[][] resumo, Scanner sc) {
@@ -504,11 +514,11 @@ public class Main {
 
     private static Object[][] efetuarVenda(Object[] venda, Scanner sc) {
         //Codigo | Nome | Quantidade | Preco | ValorPagar
-        Object[][] resumo = new Object[10][5];
+        Object[][] resumo = new Object[1][5];
         int qtd = 0;
         int contagemProduto = 0;
         while(true) {
-            System.out.println("Digite o código do produto: ");
+            System.out.println("Digite o código do produto | Ou escreva FIM para encerrar: ");
             String codigo = sc.nextLine();
             if(codigo.equalsIgnoreCase("FIM")) break;
             Object[] produto = buscarProduto(codigo);
@@ -532,7 +542,8 @@ public class Main {
                 }
             }
 
-            //TODO: diminuir quantidade em estoque
+            int estoqueAntigo = (int) tabelaProdutos[buscarIndice(codigo)][8];
+            tabelaProdutos[buscarIndice(codigo)][8] = estoqueAntigo - qtd;
             Object[] linhaResumo = new Object[5];
             linhaResumo[0] = codigo;
             linhaResumo[1] = produto[3];
@@ -541,13 +552,31 @@ public class Main {
             linhaResumo[3] = preco;
             linhaResumo[4] = preco * qtd;
             resumo[contagemProduto] = linhaResumo;
-            //TODO: aumentar matriz quando chegar na capacidade máxima
             contagemProduto++;
+            if (contagemProduto == resumo.length){
+                resumo = aumentarVendas(resumo);
+                System.out.println(resumo.length);
+            }
+
             qtd = 0;
         }
 
 
         return resumo;
+    }
+
+    private static int buscarIndice(String codigo) {
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            String codigoTabela = (String) tabelaProdutos[i][2];
+            try {
+                if (codigoTabela.equals(codigo)) {
+                    return i;
+                }
+            }catch (NullPointerException e){
+                return -1;
+            }
+        }
+        return -1;
     }
 
     private static Object[] buscarProduto(String codigo) {
