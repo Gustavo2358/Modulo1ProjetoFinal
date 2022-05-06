@@ -89,6 +89,7 @@ public class Main {
                     venda(sc);
                 case 7:
                     imprimirVendas(null,null,0, 0);
+
                     break;
             }
         }
