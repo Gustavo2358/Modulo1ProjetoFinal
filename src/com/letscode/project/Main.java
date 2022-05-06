@@ -25,30 +25,30 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         //fake mock data
-        tabelaProdutos[0] = new Object[]{Tipo.ALIMENTOS,
+        tabelaProdutos[0] = new Object[]{TipoProduto.ALIMENTOS,
                 "Nestle",
                 "abc123",
                 "Nescau",
                 4.00,
                 50,
                 LocalDateTime.now(),
-                Tipo.ALIMENTOS.calcularPreco(4.00), 50};
-        tabelaProdutos[1] = new Object[]{Tipo.BEBIDA,
+                TipoProduto.ALIMENTOS.calcularPreco(4.00), 50};
+        tabelaProdutos[1] = new Object[]{TipoProduto.BEBIDA,
                 "La Madre",
                 "wer123",
                 "don perrengue",
                 10,
                 20,
                 LocalDateTime.now(),
-                Tipo.BEBIDA.calcularPreco(4.00), 20};
-        tabelaProdutos[2] = new Object[]{Tipo.HIGIENE,
+                TipoProduto.BEBIDA.calcularPreco(10.00), 20};
+        tabelaProdutos[2] = new Object[]{TipoProduto.HIGIENE,
                 "Neve",
                 "asd234",
                 "Soft Butt",
-                10,
+                12,
                 200,
                 LocalDateTime.now(),
-                Tipo.HIGIENE.calcularPreco(4.00), 200};
+                TipoProduto.HIGIENE.calcularPreco(12.00), 200};
 
         while(true) {
 
@@ -63,20 +63,26 @@ public class Main {
                     break;
                 case 3:
                     System.out.println("Digite o tipo: (ALIMENTOS - BEBIDA - HIGIENE)");
-                    Tipo tipo = recebeTipo(sc);
+                    TipoProduto tipo = recebeTipoProduto(sc);
                     imprimirEstoque(tipo, null, null);
                     break;
                 case 4:
                     System.out.println("Digite o código:");
                     String id = sc.nextLine();
                     imprimirEstoque(null, id, null);
+                    break;
                 case 5:
                     System.out.println("Digite o nome ou parte dele: ");
                     String nome = sc.nextLine();
                     imprimirEstoque(null,null,nome);
+                    break;
+                case 6:
+                    venda(sc);
+                    break;
             }
         }
     }
+
 
     private static void cadastrarComprar(Object[] inputs) {
         int linhaTabela = produtoEstaNaTabela(inputs);
@@ -102,7 +108,7 @@ public class Main {
         tabelaProdutos[linhaTabela][6] = LocalDateTime.now();
         //atualiza preço de venda
         double precoCusto = (double)inputs[4];
-        Tipo tipo = (Tipo) inputs[0];
+        TipoProduto tipo = (TipoProduto) inputs[0];
         tabelaProdutos[linhaTabela][7] = (double)tipo.calcularPreco(precoCusto);
         //atualiza estoque
         int novoEstoque = (int)tabelaProdutos[linhaTabela][8] + (int)inputs[5];
@@ -124,7 +130,7 @@ public class Main {
             tabelaProdutos[linhaVazia][i] = inputs[i];
         }
 
-        Tipo tipo = (Tipo)inputs[0];
+        TipoProduto tipo = (TipoProduto)inputs[0];
         Double PrecoCusto = (double) inputs[4];
         tabelaProdutos[linhaVazia][7] = tipo.calcularPreco(PrecoCusto);
         tabelaProdutos[linhaVazia][8] = inputs[5];
@@ -161,7 +167,7 @@ public class Main {
         Object[] produtos = new Object[7];
         System.out.println("Tipo do produto: (ALIMENTOS - BEBIDA - HIGIENE)");
         // recebe Tipo
-        produtos[0] = recebeTipo(sc);
+        produtos[0] = recebeTipoProduto(sc);
 
         System.out.println("Marca:");
         produtos[1] = sc.nextLine();
@@ -216,7 +222,7 @@ public class Main {
         return produtos;
     }
 
-    public static Tipo recebeTipo(Scanner sc){
+    public static TipoProduto recebeTipoProduto(Scanner sc){
         String tipo;
         do{
             tipo = sc.nextLine().toUpperCase().replaceAll("\\s+","");
@@ -224,11 +230,11 @@ public class Main {
                 System.out.println("Digite um dos tipos válidos -> ALIMENTOS - BEBIDA - HIGIENE");
             }
         }while(!tipo.equals("ALIMENTOS") && !tipo.equals("BEBIDA") && !tipo.equals("HIGIENE"));
-        return Tipo.valueOf(tipo);
+        return TipoProduto.valueOf(tipo);
 
     }
 
-    private static void imprimirEstoque(Tipo tipo, String id, String nome) {
+    private static void imprimirEstoque(TipoProduto tipo, String id, String nome) {
         //cabeçalho
         for (int k = 0; k < tabelaProdutos[0].length; k++) {
             System.out.print("+----------------------------");
@@ -236,8 +242,8 @@ public class Main {
         System.out.println("+");
         String[] tableLabels = {"TIPO","MARCA","IDENTIFICADOR","NOME","PREÇO DE CUSTO","QUANTIDADE DA ULTIMA COMPRA","DATA DA COMPRA",
                 "PREÇO DE VENDA", "ESTOQUE"};
-        for (int i = 0; i < tableLabels.length; i++) {
-            System.out.printf("| %-27s", tableLabels[i]);
+        for (String tableLabel : tableLabels) {
+            System.out.printf("| %-27s", tableLabel);
         }
         System.out.println("|");
 
@@ -298,15 +304,14 @@ public class Main {
     }
 
     private static void listarTudo() {
-        first:
         for (int i = 0; i < tabelaProdutos.length; i++) {
             imprimeProdutos(i);
         }
     }
 
-    private static void listarProdutosTipo(Tipo tipo) {
+    private static void listarProdutosTipo(TipoProduto tipo) {
         for (int i = 0; i < tabelaProdutos.length; i++) {
-            Tipo tipoAtual = (Tipo) tabelaProdutos[i][0];
+            TipoProduto tipoAtual = (TipoProduto) tabelaProdutos[i][0];
             if (tipo == tipoAtual){
                 imprimeProdutos(i);
             }
@@ -332,13 +337,14 @@ public class Main {
     }
 
     public static int menu(Scanner sc){
-        int opcaoMaxima = 5;
+        int opcaoMaxima = 6;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
         System.out.println("3 - Listar os produto pelo Tipo");
         System.out.println("4 - Pesquisar um produto pelo código");
         System.out.println("5 - Pesquisar um produto pelo nome");
+        System.out.println("6 - Efetuar venda");
         int opcao = 0;
         do {
             try {
@@ -367,21 +373,43 @@ public class Main {
         return novaMatriz;
     }
 
+    private static void venda(Scanner sc) {
+        Object[] venda = new Object[4];
+        venda[0] = receberCPF(sc);
+    }
+
+    private static String receberCPF(Scanner sc) {
+        System.out.println("Deseja inserir CPF?");
+
+        return "00000000191";
+    }
+
 }
 
 
-enum Tipo {
+enum TipoProduto {
     ALIMENTOS(1.2),
     BEBIDA(2.3),
     HIGIENE(1.5);
 
     private double markup;
 
-    Tipo(double markup) {
+    TipoProduto(double markup) {
         this.markup = markup;
     }
 
     public double calcularPreco(double precoCusto){
         return this.markup * precoCusto;
     }
+}
+
+enum TipoCliente {
+    PF(0),
+    PJ(0.05),
+    VIP(0.15);
+    private double desconto;
+
+    TipoCliente(double desconto) {this.desconto = desconto;}
+
+    public double valorDescontar(double totalCompra) { return this.desconto * totalCompra;}
 }
