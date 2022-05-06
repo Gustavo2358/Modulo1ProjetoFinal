@@ -8,7 +8,10 @@ public class Main {
 
     public static final int QTD_COLUNAS = 9;
     public static final int QTD_LINHAS = 4;
+    public static final int QTD_COLUNASV = 4;
+    public static final int QTD_LINHASV = 4;
     public static Object[][] tabelaProdutos = new Object[QTD_LINHAS][QTD_COLUNAS];
+    public static Object[][] tabelaVendas = new Object[QTD_LINHASV][QTD_COLUNASV];
     /*
     0 Tipo
 	1 Marca
@@ -50,6 +53,12 @@ public class Main {
                 LocalDateTime.now(),
                 TipoProduto.HIGIENE.calcularPreco(12.00), 200};
 
+                tabelaVendas[0] = new Object[]{TipoCliente.PF,
+                "000.000.001-01",
+                2,
+                15.50
+                };
+
         while(true) {
 
             int opcao = menu(sc);
@@ -78,6 +87,8 @@ public class Main {
                     break;
                 case 6:
                     venda(sc);
+                case 7:
+                    imprimirVendas(null,null,0, 0);
                     break;
             }
         }
@@ -336,8 +347,32 @@ public class Main {
 
     }
 
+    private static void imprimirVendas(TipoCliente tipo, String CPF, int qtdProduto, double total) {
+        //cabeçalho
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+        String[] tableLabels = {"CPF","TIPO DE CLIENTE","QUANTIDADE VENDIDA","PREÇO DA VENDA"};
+        for (String tableLabel : tableLabels) {
+            System.out.printf("| %-27s", tableLabel);
+        }
+        System.out.println("|");
+
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+        //linha final
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+    }
+
     public static int menu(Scanner sc){
-        int opcaoMaxima = 6;
+        int opcaoMaxima = 7;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
@@ -345,6 +380,7 @@ public class Main {
         System.out.println("4 - Pesquisar um produto pelo código");
         System.out.println("5 - Pesquisar um produto pelo nome");
         System.out.println("6 - Efetuar venda");
+        System.out.println("7 - Relatório de vendas análitico");
         int opcao = 0;
         do {
             try {
@@ -371,6 +407,19 @@ public class Main {
         }
 
         return novaMatriz;
+    }
+
+    public static Object[][] aumentarVendas(Object[][] matriz){
+        Object[][] novaVendas = new Object [matriz.length * 2][QTD_COLUNAS];
+
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < tabelaVendas[0].length; j++) {
+                novaVendas[i][j] = matriz[i][j];
+            }
+
+        }
+
+        return novaVendas;
     }
 
     private static void venda(Scanner sc) {
