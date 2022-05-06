@@ -390,16 +390,65 @@ public class Main {
         Object[][] resumo = efetuarVenda(venda, sc);
 
         //imprime matriz para DEBUG
-        for( Object[] a : resumo){
-            System.out.println(Arrays.toString(a));
+//        for( Object[] a : resumo){
+//            System.out.println(Arrays.toString(a));
+//        }
+
+
+        imprimirResumo(resumo,sc);
+        double valorTotal = calcularValorTotal(resumo);
+//        System.out.println("Valor Total: %.2f%n", valorTotal);
+        String enter;
+        do{
+            System.out.println("digite ENTER para voltar para o menu principal");
+            enter = sc.nextLine();
+        }while(!enter.equals(""));
+
+
+    }
+
+    private static double calcularValorTotal(Object[][] resumo) {
+        //TODO implementar calcular valor total
+        return 0;
+    }
+
+    private static void imprimirResumo(Object[][] resumo, Scanner sc) {
+        System.out.println("################");
+        System.out.println("#    RESUMO    #");
+        System.out.println("################");
+        //cabeçalho
+        for (int k = 0; k < resumo[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+        String[] tableLabels = {"CODIGO","NOME","QUANTIDADE","PREÇO","VALOR A PAGAR"};
+        for (String tableLabel : tableLabels) {
+            System.out.printf("| %-27s", tableLabel);
+        }
+        System.out.println("|");
+
+        for (int k = 0; k < resumo[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+        first:
+        for (int i = 0; i < resumo.length; i++) {
+            for (int j = 0; j < resumo[0].length; j++) {
+                if(resumo[i][j] != null) {
+                    System.out.printf("| %-27s", resumo[i][j].toString());
+                }else{
+                    break first;
+                }
+            }
+            System.out.println("|");
         }
 
-
-        //TODO: Imprimir resumo
-        //TODO: Mostrar Valor total a pagar
-        //TODO: Armazenar na matriz global
-        //TODO: Mensagem para voltar ao menu principal
-
+        //linha final
+        for (int k = 0; k < resumo[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
 
     }
 
