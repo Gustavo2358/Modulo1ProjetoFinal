@@ -9,6 +9,17 @@ public class Main {
     public static final int QTD_COLUNAS = 9;
     public static final int QTD_LINHAS = 4;
     public static Object[][] tabelaProdutos = new Object[QTD_LINHAS][QTD_COLUNAS];
+    /*
+    0 Tipo
+	1 Marca
+	2 Identificador
+	3 Nome
+	4 Preco Custo
+	5 Quantidade
+	6 Data Compra
+	6 Preco
+	7 Estoque
+     */
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -50,13 +61,18 @@ public class Main {
                     cadastrarComprar(receberInput(sc));
                     break;
                 case 2:
-                    imprimirEstoque(null);
+                    imprimirEstoque(null, null, null);
                     break;
                 case 3:
                     System.out.println("Digite o tipo: (ALIMENTOS - BEBIDA - HIGIENE)");
                     Tipo tipo = recebeTipo(sc);
-                    imprimirEstoque(tipo);
+                    imprimirEstoque(tipo, null, null);
                     break;
+                case 4:
+                    System.out.println("Digite o código:");
+                    //TODO: implementar validações
+                    String id = sc.nextLine();
+                    imprimirEstoque(null, id, null);
             }
         }
     }
@@ -211,7 +227,7 @@ public class Main {
 
     }
 
-    private static void imprimirEstoque(Tipo tipo) {
+    private static void imprimirEstoque(Tipo tipo, String id, String nome) {
         //cabeçalho
         for (int k = 0; k < tabelaProdutos[0].length; k++) {
             System.out.print("+----------------------------");
@@ -229,28 +245,16 @@ public class Main {
         }
         System.out.println("+");
 
-        //produtos
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        if(tipo != null){
-            listarProdutosTipo(tipo);
-        }else {
-            first:
-            for (int i = 0; i < tabelaProdutos.length; i++) {
 
-                for (int j = 0; j < tabelaProdutos[0].length; j++) {
-                    if(j == 6){
-                        LocalDateTime date = (LocalDateTime) tabelaProdutos[i][j];
-                        System.out.printf("| %-27s", formatter.format(date));
-                    }else if(j == 7){
-                        System.out.printf("| %-27.2f", tabelaProdutos[i][j]);
-                    }else if (tabelaProdutos[i][j] != null) {
-                        System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
-                    } else{
-                        break first;
-                    }
-                }
-                System.out.println("|");
-            }
+        //produtos
+        if(tipo != null){   //se for passado um tipo, listar pelo tipo
+            listarProdutosTipo(tipo);
+
+        }else if(id != null){
+          listarProdutosId(id);
+
+        } else { //listar todos os produtos
+            listarTudo();
         }
         //linha final
         for (int k = 0; k < tabelaProdutos[0].length; k++) {
@@ -260,36 +264,75 @@ public class Main {
 
     }
 
-    private static void listarProdutosTipo(Tipo tipo) {
+    private static void listarProdutosId(String id) {
+        //considera que os identificadores são únicos
+        String identificador;
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            identificador = (String) tabelaProdutos[i][2];
+            try {
+                if (identificador.equals(id)) {
+                    imprimeProdutos(i);
+                    return;
+                }
+            }catch (NullPointerException e){
+                System.out.println("Código inválido.");
+            }
+
+        }
+    }
+
+    private static void listarTudo() {
         first:
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            imprimeProdutos(i);
+        }
+    }
+
+    private static void listarProdutosTipo(Tipo tipo) {
         for (int i = 0; i < tabelaProdutos.length; i++) {
             Tipo tipoAtual = (Tipo) tabelaProdutos[i][0];
             if (tipo == tipoAtual){
-                for (int j = 0; j < tabelaProdutos[0].length; j++) {
-                    if (tabelaProdutos[i][j] != null) System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
-                    else break first;
-                }
-                System.out.println("|");
+                imprimeProdutos(i);
             }
         }
     }
 
+    private static void imprimeProdutos(int i){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        for (int j = 0; j < tabelaProdutos[0].length; j++) {
+            if(j == 6){
+                LocalDateTime date = (LocalDateTime) tabelaProdutos[i][j];
+                System.out.printf("| %-27s", formatter.format(date));
+            }else if(j == 7){
+                System.out.printf("| %-27.2f", tabelaProdutos[i][j]);
+            }else if (tabelaProdutos[i][j] != null) {
+                System.out.printf("| %-27s", tabelaProdutos[i][j].toString());
+            } else{
+                return;
+            }
+        }
+        System.out.println("|");
+
+    }
+
     public static int menu(Scanner sc){
+        int opcaoMaxima = 4;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
         System.out.println("3 - Listar os produto pelo Tipo");
+        System.out.println("4 - Pesquisar um produto pelo código");
         int opcao = 0;
         do {
             try {
                 opcao = Integer.parseInt(sc.nextLine());
             }catch (NumberFormatException exception){
-                System.out.println("Opção inválida. Digite um número entre 1 e 3.");
+                System.out.printf("Opção inválida. Digite um número entre 1 e %d.%n", opcaoMaxima);
             }
-            if(opcao < 1 || opcao > 3){
-                System.out.println("Digite 1, 2 ou 3.");
+            if(opcao < 1 || opcao > opcaoMaxima){
+                System.out.printf("Digite um número entre 1 e %d (incluso).%n", opcaoMaxima);
             }
-        }while(opcao < 1 || opcao > 3);
+        }while(opcao < 1 || opcao > opcaoMaxima);
 
         return opcao;
     }
