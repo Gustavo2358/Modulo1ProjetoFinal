@@ -2,6 +2,7 @@ package com.letscode.project;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -17,8 +18,8 @@ public class Main {
 	4 Preco Custo
 	5 Quantidade
 	6 Data Compra
-	6 Preco
-	7 Estoque
+	7 Preco
+	8 Estoque
      */
 
     public static void main(String[] args) {
@@ -32,7 +33,8 @@ public class Main {
                 4.00,
                 50,
                 LocalDateTime.now(),
-                TipoProduto.ALIMENTOS.calcularPreco(4.00), 50};
+                TipoProduto.ALIMENTOS.calcularPreco(4.00),
+                50};
         tabelaProdutos[1] = new Object[]{TipoProduto.BEBIDA,
                 "La Madre",
                 "wer123",
@@ -40,7 +42,8 @@ public class Main {
                 10,
                 20,
                 LocalDateTime.now(),
-                TipoProduto.BEBIDA.calcularPreco(10.00), 20};
+                TipoProduto.BEBIDA.calcularPreco(10.00),
+                20};
         tabelaProdutos[2] = new Object[]{TipoProduto.HIGIENE,
                 "Neve",
                 "asd234",
@@ -48,7 +51,8 @@ public class Main {
                 12,
                 200,
                 LocalDateTime.now(),
-                TipoProduto.HIGIENE.calcularPreco(12.00), 200};
+                TipoProduto.HIGIENE.calcularPreco(12.00),
+                200};
 
         while(true) {
 
@@ -109,7 +113,7 @@ public class Main {
         //atualiza preço de venda
         double precoCusto = (double)inputs[4];
         TipoProduto tipo = (TipoProduto) inputs[0];
-        tabelaProdutos[linhaTabela][7] = (double)tipo.calcularPreco(precoCusto);
+        tabelaProdutos[linhaTabela][7] = tipo.calcularPreco(precoCusto);
         //atualiza estoque
         int novoEstoque = (int)tabelaProdutos[linhaTabela][8] + (int)inputs[5];
         tabelaProdutos[linhaTabela][8] = novoEstoque;
@@ -375,11 +379,137 @@ public class Main {
 
     private static void venda(Scanner sc) {
         Object[] venda = new Object[4];
-        venda[0] = receberCPF(sc);
+        String CPF = receberCPF(sc);
+        venda[0] = CPF;
+        if(CPF.equals("00000000191")){
+            venda[1] = TipoCliente.PF;
+        }else {
+            venda[1] = receberTipoCliente(sc);
+        }
+        int qtdProdutos = 0;
+        Object[][] resumo = efetuarVenda(venda, sc);
+
+        //imprime matriz para DEBUG
+        for( Object[] a : resumo){
+            System.out.println(Arrays.toString(a));
+        }
+
+
+        //TODO: Imprimir resumo
+        //TODO: Mostrar Valor total a pagar
+        //TODO: Armazenar na matriz global
+        //TODO: Mensagem para voltar ao menu principal
+
+
+    }
+
+    private static Object[][] efetuarVenda(Object[] venda, Scanner sc) {
+        //Codigo | Nome | Quantidade | Preco | ValorPagar
+        Object[][] resumo = new Object[10][5];
+        int qtd = 0;
+        int contagemProduto = 0;
+        while(true) {
+            System.out.println("Digite o código do produto: ");
+            String codigo = sc.nextLine();
+            if(codigo.equalsIgnoreCase("FIM")) break;
+            Object[] produto = buscarProduto(codigo);
+            if(produto == null) {
+                System.out.println("Produto inválido.");
+                continue;
+            }
+            System.out.println("Digite a quantidade:");
+            int estoque = (int) produto[8];
+            while(qtd <= 0) {
+                try {
+                    qtd = Math.abs(Integer.parseInt(sc.nextLine()));
+                }catch (NumberFormatException e){
+                    System.out.println("digíte um número inteiro.");
+                }
+
+                if(qtd > estoque){
+                    System.out.printf("A quantidade desse item disponível no estoque é: %d%n" +
+                            "Digíte uma quantidade válida: %n", estoque);
+                    qtd = 0;
+                }
+            }
+
+            //TODO: diminuir quantidade em estoque
+            Object[] linhaResumo = new Object[5];
+            linhaResumo[0] = codigo;
+            linhaResumo[1] = produto[3];
+            linhaResumo[2] = qtd;
+            double preco = (double)produto[7];
+            linhaResumo[3] = preco;
+            linhaResumo[4] = preco * qtd;
+            resumo[contagemProduto] = linhaResumo;
+            //TODO: aumentar matriz quando chegar na capacidade máxima
+            contagemProduto++;
+            qtd = 0;
+        }
+
+
+        return resumo;
+    }
+
+    private static Object[] buscarProduto(String codigo) {
+        for (int i = 0; i < tabelaProdutos.length; i++) {
+            String codigoTabela = (String) tabelaProdutos[i][2];
+            try {
+                if (codigoTabela.equals(codigo)) {
+                    return tabelaProdutos[i];
+                }
+            }catch (NullPointerException e){
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static TipoCliente receberTipoCliente(Scanner sc) {
+        System.out.println("Digíte o Tipo do cliente: \nPF para Pessoa física\n" +
+                "PJ para pessoa juridica e \n" +
+                "VIP para cliente vip ");
+        String tipo;
+        do{
+            tipo = sc.nextLine().toUpperCase().replaceAll("\\s+","");
+            if(!tipo.equals("PF") && !tipo.equals("PJ") && !tipo.equals("VIP")){
+                System.out.println("Digite um dos tipos válidos -> PF - PJ - VIP");
+            }
+        }while(!tipo.equals("PF") && !tipo.equals("PJ") && !tipo.equals("VIP"));
+        return TipoCliente.valueOf(tipo);
     }
 
     private static String receberCPF(Scanner sc) {
-        System.out.println("Deseja inserir CPF?");
+        System.out.println("Deseja inserir CPF? [Digite S para sim e N para não.]");
+        String escolha = "";
+        do {
+            escolha = sc.nextLine().toUpperCase();
+            if ( !escolha.equals("S") && !escolha.equals("N")){
+                System.out.println("Entrada inválida, digite S para sim e N para não.");
+            }
+        }while( !escolha.equals("S") && !escolha.equals("N"));
+
+        if (escolha.equals("S")){
+            String CPF = "";
+            System.out.println("Digite o CPF (sem usar \".\" e \"-\":)");
+            boolean cpfValido = false;
+            do {
+                CPF = sc.nextLine();
+                try{
+                    Long.parseLong(CPF);
+                }catch (NumberFormatException e){
+                    System.out.println("Digite apenas números.");
+                    continue;
+                }
+                if(CPF.length() == 11){
+                    cpfValido = true;
+                }else{
+                    System.out.println("O CPF deve conter 11 números:");
+                }
+
+            }while(!cpfValido);
+            return CPF;
+        }
 
         return "00000000191";
     }
