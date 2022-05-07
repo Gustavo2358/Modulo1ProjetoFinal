@@ -10,6 +10,9 @@ public class Main {
     public static final int QTD_COLUNAS = 9;
     public static final int QTD_LINHAS = 4;
     public static Object[][] tabelaProdutos = new Object[QTD_LINHAS][QTD_COLUNAS];
+    public static final int QTD_COLUNASV = 4;
+    public static final int QTD_LINHASV = 4;
+    public static Object[][] tabelaVendas = new Object[QTD_LINHASV][QTD_COLUNASV];
     /*
     0 Tipo
 	1 Marca
@@ -54,6 +57,13 @@ public class Main {
                 TipoProduto.HIGIENE.calcularPreco(12.00),
                 200};
 
+        tabelaVendas[0] = new Object[]{"00000000191",
+                TipoCliente.PF,
+                10,
+                45.00};
+
+
+
         while(true) {
 
             int opcao = menu(sc);
@@ -82,6 +92,9 @@ public class Main {
                     break;
                 case 6:
                     venda(sc);
+                    break;
+                case 7:
+                    imprimirVendas();
                     break;
             }
         }
@@ -277,6 +290,50 @@ public class Main {
 
     }
 
+    private static void imprimirVendas() {
+        //cabeçalho
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+        String[] tableLabels = {"CPF","TIPO DE CLIENTE","QUANTIDADE VENDIDA","PREÇO DA VENDA"};
+        for (String tableLabel : tableLabels) {
+            System.out.printf("| %-27s", tableLabel);
+        }
+        System.out.println("|");
+
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+        first:
+        for (int i = 0; i < tabelaVendas.length; i++) {
+            for (int j = 0; j < tabelaVendas[0].length; j++) {
+                if(tabelaVendas[i][j] == null) {
+                    break first;
+                } else if(j == 1){
+                    TipoCliente tipo = (TipoCliente) tabelaVendas[i][j];
+                    System.out.printf("| %-27s", tipo.getDescrição());
+
+                } else if(j == 3){
+                    double valor = (double) tabelaVendas[i][j];
+                    System.out.printf("| %-27.2f", valor);
+                }else {
+                    System.out.printf("| %-27s", tabelaVendas[i][j].toString());
+                }
+            }
+            System.out.println("|");
+        }
+
+        //linha final
+        for (int k = 0; k < tabelaVendas[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+    }
+
     private static void listarProdutosNome(String nome) {
         for (int i = 0; i < tabelaProdutos.length; i++) {
             String nomeTabela = (String) tabelaProdutos[i][3];
@@ -341,7 +398,7 @@ public class Main {
     }
 
     public static int menu(Scanner sc){
-        int opcaoMaxima = 6;
+        int opcaoMaxima = 7;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
@@ -349,6 +406,7 @@ public class Main {
         System.out.println("4 - Pesquisar um produto pelo código");
         System.out.println("5 - Pesquisar um produto pelo nome");
         System.out.println("6 - Efetuar venda");
+        System.out.println("7 - Relatório de vendas análitico");
         int opcao = 0;
         do {
             try {
@@ -390,17 +448,27 @@ public class Main {
     }
 
     private static void venda(Scanner sc) {
+        int indiceTabelaVendas = indiceTabelaVendas();
         Object[] venda = new Object[4];
         String CPF = receberCPF(sc);
+        tabelaVendas[indiceTabelaVendas][0] = CPF;
         venda[0] = CPF;
+
         if(CPF.equals("00000000191")){
             venda[1] = TipoCliente.PF;
         }else {
             venda[1] = receberTipoCliente(sc);
         }
+        tabelaVendas[indiceTabelaVendas][1] = venda[1];
+
         int qtdProdutos = 0;
         Object[][] resumo = efetuarVenda(venda, sc);
-
+        for (int i = 0; i < resumo.length; i++) {
+            if(resumo[i][2] == null)
+                break;
+            qtdProdutos += (int)resumo[i][2];
+        }
+        tabelaVendas[indiceTabelaVendas][2] = qtdProdutos;
         //imprime matriz para DEBUG
 //        for( Object[] a : resumo){
 //            System.out.println(Arrays.toString(a));
@@ -412,6 +480,7 @@ public class Main {
         TipoCliente tipo = (TipoCliente) venda[1];
         double valorTotalDescontado = valorTotal - tipo.valorDescontar(valorTotal);
         System.out.printf("Valor Total: %.2f%n", valorTotalDescontado);
+        tabelaVendas[indiceTabelaVendas][3] = valorTotalDescontado;
         String enter;
         do{
             System.out.println("digite ENTER para voltar para o menu principal");
@@ -419,6 +488,14 @@ public class Main {
         }while(!enter.equals(""));
 
 
+    }
+
+    private static int indiceTabelaVendas() {
+        for (int i = 0; i < tabelaVendas.length; i++) {
+            if(tabelaVendas[i][0] == null)
+                return i;
+        }
+        return 0;
     }
 
     private static double calcularValorTotal(Object[][] resumo) {
@@ -518,7 +595,8 @@ public class Main {
             if(contagemProduto == resumo.length){
                 resumo = aumentarMatrizGenerico(resumo);
                 System.out.println(resumo.length);
-                }
+            }
+
             qtd = 0;
 
         }
@@ -624,12 +702,21 @@ enum TipoProduto {
 }
 
 enum TipoCliente {
-    PF(0),
-    PJ(0.05),
-    VIP(0.15);
-    private double desconto;
+    PF(0, "Pessoa Física"),
+    PJ(0.05, "Pessoa Jurídica"),
+    VIP(0.15, "VIP");
 
-    TipoCliente(double desconto) {this.desconto = desconto;}
+    private double desconto;
+    private String descrição;
+
+    TipoCliente(double desconto, String descrição) {
+        this.desconto = desconto;
+        this.descrição = descrição;
+    }
+
+    public String getDescrição() {
+        return descrição;
+    }
 
     public double valorDescontar(double totalCompra) { return this.desconto * totalCompra;}
 }
