@@ -378,13 +378,12 @@ public class Main {
     }
 
     public static Object[][] aumentarMatrizGenerico(Object[][] matriz){
-        Object[][] novaMatriz = new Object [matriz.length * 2][QTD_COLUNAS];
+        Object[][] novaMatriz = new Object [matriz.length * 2][matriz[0].length];
 
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[0].length; j++) {
                 novaMatriz[i][j] = matriz[i][j];
             }
-
         }
 
         return novaMatriz;
