@@ -2,7 +2,6 @@ package com.letscode.project;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -11,7 +10,7 @@ public class Main {
     public static final int QTD_LINHAS = 4;
     public static Object[][] tabelaProdutos = new Object[QTD_LINHAS][QTD_COLUNAS];
     public static final int QTD_COLUNASV = 4;
-    public static final int QTD_LINHASV = 4;
+    public static final int QTD_LINHASV = 5;
     public static Object[][] tabelaVendas = new Object[QTD_LINHASV][QTD_COLUNASV];
     /*
     0 Tipo
@@ -62,7 +61,20 @@ public class Main {
                 10,
                 45.00};
 
+        tabelaVendas[1] = new Object[]{"00000000191",
+                TipoCliente.PF,
+                15,
+                295.00};
 
+        tabelaVendas[2] = new Object[]{"12345678901",
+                TipoCliente.VIP,
+                30,
+                410.55};
+
+        tabelaVendas[3] = new Object[]{"17171717171",
+                TipoCliente.PJ,
+                50,
+                855.00};
 
         while(true) {
 
@@ -96,8 +108,79 @@ public class Main {
                 case 7:
                     imprimirVendas();
                     break;
+                case 8:
+                    relatorioSintetico();
+                    break;
             }
         }
+    }
+
+    private static void relatorioSintetico() {
+        //criar um array com todos os cpf (sem repetir)
+        String[] arrayCPF = buscarCPF();
+        //construir matriz, percorrer o array e trazer a quantidade de produtos e valores para a matriz
+        Object[][] relatorioSintetico = construirRelatorioSintetico(arrayCPF);
+        //imprimir
+        imprimirRelatorioSintetico(relatorioSintetico);
+    }
+
+    private static Object[][] construirRelatorioSintetico(String[] arrayCPF) {
+        Object[][] relatorioSintetico = new Object[arrayCPF.length][3];
+        int qtdProdutos = 0;
+        double valorPago = 0;
+        for (int i = 0; i < arrayCPF.length; i++) {
+            for (int j = 0; j < tabelaVendas.length; j++) {
+                if(tabelaVendas[j][0] == null){
+                    break;
+                }
+                if(arrayCPF[i].equals(tabelaVendas[j][0])){
+                    qtdProdutos += (int)tabelaVendas[j][2];
+                    valorPago += (double)tabelaVendas[j][3];
+                }
+            }
+            relatorioSintetico[i][0] = arrayCPF[i];
+            relatorioSintetico[i][1] = qtdProdutos;
+            relatorioSintetico[i][2] = valorPago;
+            qtdProdutos = 0;
+            valorPago = 0;
+        }
+        return relatorioSintetico;
+    }
+
+    private static String[] buscarCPF(){
+        String[] arrayCPF = new String[0];
+        String cpf;
+        for (int i = 0; i < tabelaVendas.length; i++) {
+            cpf = (String)tabelaVendas[i][0];
+            if(cpf == null) break;
+            if(!isInArray(cpf, arrayCPF)){
+                arrayCPF = aumentarArray(arrayCPF);
+                arrayCPF[arrayCPF.length - 1] = cpf;
+            }
+        }
+        return arrayCPF;
+    }
+
+    private static String[] aumentarArray(String[] arrayCPF) {
+        String[] novoArrayCpf = new String[arrayCPF.length + 1];
+        for (int i = 0; i < arrayCPF.length; i++) {
+            novoArrayCpf[i] = arrayCPF[i];
+        }
+        return novoArrayCpf;
+
+    }
+
+    private static boolean isInArray(String cpf, String[] arrayCPF) {
+        for (String c : arrayCPF){
+            try {
+                if(c.equals(cpf)){
+                    return true;
+                }
+            }catch (NullPointerException e){
+                break;
+            }
+        }
+        return false;
     }
 
 
@@ -106,7 +189,7 @@ public class Main {
         if( linhaTabela < 0){
             cadastrarNovoProduto(inputs);
             if( tabelaProdutos[tabelaProdutos.length - 1][0] != null){
-                tabelaProdutos = aumentarMatriz(tabelaProdutos);
+                tabelaProdutos = aumentarMatrizGenerico(tabelaProdutos);
                 System.out.printf("A tabela foi redimensionada, agora ela possui a capacidade de" +
                         " %d linhas.%n", tabelaProdutos.length);
             }
@@ -333,6 +416,48 @@ public class Main {
         System.out.println("+");
 
     }
+    private static void imprimirRelatorioSintetico(Object[][] relatorio) {
+        //cabeçalho
+        System.out.println("###############################");
+        System.out.println("#    Relatório Consolidado    #");
+        System.out.println("###############################");
+        for (int k = 0; k < relatorio[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+        String[] tableLabels = {"CPF","QUANTIDADE VENDIDA","PREÇO DA VENDA"};
+        for (String tableLabel : tableLabels) {
+            System.out.printf("| %-27s", tableLabel);
+        }
+        System.out.println("|");
+
+        for (int k = 0; k < relatorio[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+        first:
+        for (int i = 0; i < relatorio.length; i++) {
+            for (int j = 0; j < relatorio[0].length; j++) {
+                if(relatorio[i][j] == null) {
+                    break first;
+                } else if(j == 2){
+                    double valor = (double) relatorio[i][j];
+                    System.out.printf("| %-27.2f", valor);
+                }else {
+                    System.out.printf("| %-27s", relatorio[i][j].toString());
+                }
+            }
+            System.out.println("|");
+        }
+
+        //linha final
+        for (int k = 0; k < relatorio[0].length; k++) {
+            System.out.print("+----------------------------");
+        }
+        System.out.println("+");
+
+    }
 
     private static void listarProdutosNome(String nome) {
         for (int i = 0; i < tabelaProdutos.length; i++) {
@@ -398,7 +523,7 @@ public class Main {
     }
 
     public static int menu(Scanner sc){
-        int opcaoMaxima = 7;
+        int opcaoMaxima = 8;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
@@ -406,7 +531,8 @@ public class Main {
         System.out.println("4 - Pesquisar um produto pelo código");
         System.out.println("5 - Pesquisar um produto pelo nome");
         System.out.println("6 - Efetuar venda");
-        System.out.println("7 - Relatório de vendas análitico");
+        System.out.println("7 - Relatório de vendas analítico");
+        System.out.println("8 - Relatório de vendas consolidado");
         int opcao = 0;
         do {
             try {
@@ -420,19 +546,6 @@ public class Main {
         }while(opcao < 1 || opcao > opcaoMaxima);
 
         return opcao;
-    }
-
-    public static Object[][] aumentarMatriz(Object[][] matriz){
-        Object[][] novaMatriz = new Object [matriz.length * 2][QTD_COLUNAS];
-
-        for (int i = 0; i < matriz.length; i++) {
-            for (int j = 0; j < tabelaProdutos[0].length; j++) {
-                novaMatriz[i][j] = matriz[i][j];
-            }
-
-        }
-
-        return novaMatriz;
     }
 
     public static Object[][] aumentarMatrizGenerico(Object[][] matriz){
@@ -449,6 +562,13 @@ public class Main {
 
     private static void venda(Scanner sc) {
         int indiceTabelaVendas = indiceTabelaVendas();
+        if(indiceTabelaVendas == -1){
+            tabelaVendas = aumentarMatrizGenerico(tabelaVendas);
+            indiceTabelaVendas = indiceTabelaVendas();
+            //TODO remover debug
+            System.out.println("a tabela de vendas foi aumentada " + tabelaVendas.length);
+
+        }
         Object[] venda = new Object[4];
         String CPF = receberCPF(sc);
         tabelaVendas[indiceTabelaVendas][0] = CPF;
@@ -495,7 +615,7 @@ public class Main {
             if(tabelaVendas[i][0] == null)
                 return i;
         }
-        return 0;
+        return -1;
     }
 
     private static double calcularValorTotal(Object[][] resumo) {
@@ -553,11 +673,11 @@ public class Main {
 
     private static Object[][] efetuarVenda(Object[] venda, Scanner sc) {
         //Codigo | Nome | Quantidade | Preco | ValorPagar
-        Object[][] resumo = new Object[1][5];
+        Object[][] resumo = new Object[5][5];
         int qtd = 0;
         int contagemProduto = 0;
         while(true) {
-            System.out.println("Digite o código do produto: ");
+            System.out.println("Digite o código do produto, ou FIM para finalizar: ");
             String codigo = sc.nextLine();
             if(codigo.equalsIgnoreCase("FIM")) break;
             Object[] produto = buscarProduto(codigo);
@@ -565,8 +685,13 @@ public class Main {
                 System.out.println("Produto inválido.");
                 continue;
             }
-            System.out.println("Digite a quantidade:");
+
             int estoque = (int) produto[8];
+            if (estoque == 0){
+                System.out.println("Este produto está temporariamente esgotado. ");
+                continue;
+            }
+            System.out.println("Digite a quantidade:");
             while(qtd <= 0) {
                 try {
                     qtd = Math.abs(Integer.parseInt(sc.nextLine()));
@@ -594,7 +719,8 @@ public class Main {
             contagemProduto++;
             if(contagemProduto == resumo.length){
                 resumo = aumentarMatrizGenerico(resumo);
-                System.out.println(resumo.length);
+                //TODO apagar DEBUG
+                System.out.printf("DEBUG matriz aumentada %d %n ",resumo.length);
             }
 
             qtd = 0;
