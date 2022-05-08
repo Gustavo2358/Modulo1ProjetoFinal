@@ -2,6 +2,7 @@ package com.letscode.project;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Main {
@@ -12,69 +13,58 @@ public class Main {
     public static final int QTD_COLUNASV = 4;
     public static final int QTD_LINHASV = 5;
     public static Object[][] tabelaVendas = new Object[QTD_LINHASV][QTD_COLUNASV];
-    /*
-    0 Tipo
-	1 Marca
-	2 Identificador
-	3 Nome
-	4 Preco Custo
-	5 Quantidade
-	6 Data Compra
-	7 Preco
-	8 Estoque
-     */
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
         //fake mock data
-        tabelaProdutos[0] = new Object[]{TipoProduto.ALIMENTOS,
-                "Nestle",
-                "abc123",
-                "Nescau",
-                4.00,
-                50,
-                LocalDateTime.now(),
-                TipoProduto.ALIMENTOS.calcularPreco(4.00),
-                50};
-        tabelaProdutos[1] = new Object[]{TipoProduto.BEBIDA,
-                "La Madre",
-                "wer123",
-                "don perrengue",
-                10,
-                20,
-                LocalDateTime.now(),
-                TipoProduto.BEBIDA.calcularPreco(10.00),
-                20};
-        tabelaProdutos[2] = new Object[]{TipoProduto.HIGIENE,
-                "Neve",
-                "asd234",
-                "Soft Butt",
-                12,
-                200,
-                LocalDateTime.now(),
-                TipoProduto.HIGIENE.calcularPreco(12.00),
-                200};
-
-        tabelaVendas[0] = new Object[]{"00000000191",
-                TipoCliente.PF,
-                10,
-                45.00};
-
-        tabelaVendas[1] = new Object[]{"00000000191",
-                TipoCliente.PF,
-                15,
-                295.00};
-
-        tabelaVendas[2] = new Object[]{"12345678901",
-                TipoCliente.VIP,
-                30,
-                410.55};
-
-        tabelaVendas[3] = new Object[]{"17171717171",
-                TipoCliente.PJ,
-                50,
-                855.00};
+//        tabelaProdutos[0] = new Object[]{TipoProduto.ALIMENTOS,
+//                "Nestle",
+//                "abc123",
+//                "Nescau",
+//                4.00,
+//                50,
+//                LocalDateTime.now(),
+//                TipoProduto.ALIMENTOS.calcularPreco(4.00),
+//                50};
+//        tabelaProdutos[1] = new Object[]{TipoProduto.BEBIDA,
+//                "La Madre",
+//                "wer123",
+//                "don perrengue",
+//                10,
+//                20,
+//                LocalDateTime.now(),
+//                TipoProduto.BEBIDA.calcularPreco(10.00),
+//                20};
+//        tabelaProdutos[2] = new Object[]{TipoProduto.HIGIENE,
+//                "Neve",
+//                "asd234",
+//                "Soft Butt",
+//                12,
+//                200,
+//                LocalDateTime.now(),
+//                TipoProduto.HIGIENE.calcularPreco(12.00),
+//                200};
+//
+//        tabelaVendas[0] = new Object[]{"00000000191",
+//                TipoCliente.PF,
+//                10,
+//                45.00};
+//
+//        tabelaVendas[1] = new Object[]{"00000000191",
+//                TipoCliente.PF,
+//                15,
+//                295.00};
+//
+//        tabelaVendas[2] = new Object[]{"12345678901",
+//                TipoCliente.VIP,
+//                30,
+//                410.55};
+//
+//        tabelaVendas[3] = new Object[]{"17171717171",
+//                TipoCliente.PJ,
+//                50,
+//                855.00};
 
         while(true) {
 
@@ -111,8 +101,24 @@ public class Main {
                 case 8:
                     relatorioSintetico();
                     break;
+                case 9:
+                    if(confirmacaoSair(sc)) {
+                        return;
+                    }
+                    break;
             }
         }
+    }
+
+    private static boolean confirmacaoSair(Scanner sc) {
+        System.out.println("Deseja mesmo sair? \n" +
+                        "Caso o programa seja encerrado, todos os dados serão perdidos...\n" +
+                        "[S para sair, ou digite qualquer tecla para cancelar.] \n"
+                );
+        if(sc.nextLine().toUpperCase(Locale.ROOT).equals("S")){
+            return true;
+        }
+        return false;
     }
 
     private static void relatorioSintetico() {
@@ -463,7 +469,7 @@ public class Main {
         for (int i = 0; i < tabelaProdutos.length; i++) {
             String nomeTabela = (String) tabelaProdutos[i][3];
             try {
-                if (nomeTabela.contains(nome)) {
+                if (nomeTabela.toLowerCase(Locale.ROOT).contains(nome.toLowerCase(Locale.ROOT))) {
                     imprimeProdutos(i);
                 }
             }catch (NullPointerException e){
@@ -523,7 +529,7 @@ public class Main {
     }
 
     public static int menu(Scanner sc){
-        int opcaoMaxima = 8;
+        int opcaoMaxima = 9;
         System.out.println("Digite a opção desejada: ");
         System.out.println("1 - Cadastrar/Comprar produtos");
         System.out.println("2 - Imprimir estoque");
@@ -533,6 +539,7 @@ public class Main {
         System.out.println("6 - Efetuar venda");
         System.out.println("7 - Relatório de vendas analítico");
         System.out.println("8 - Relatório de vendas consolidado");
+        System.out.println("9 - Sair");
         int opcao = 0;
         do {
             try {
@@ -565,8 +572,6 @@ public class Main {
         if(indiceTabelaVendas == -1){
             tabelaVendas = aumentarMatrizGenerico(tabelaVendas);
             indiceTabelaVendas = indiceTabelaVendas();
-            //TODO remover debug
-            System.out.println("a tabela de vendas foi aumentada " + tabelaVendas.length);
 
         }
         Object[] venda = new Object[4];
@@ -589,11 +594,6 @@ public class Main {
             qtdProdutos += (int)resumo[i][2];
         }
         tabelaVendas[indiceTabelaVendas][2] = qtdProdutos;
-        //imprime matriz para DEBUG
-//        for( Object[] a : resumo){
-//            System.out.println(Arrays.toString(a));
-//        }
-
 
         imprimirResumo(resumo,sc);
         double valorTotal = calcularValorTotal(resumo);
@@ -719,14 +719,11 @@ public class Main {
             contagemProduto++;
             if(contagemProduto == resumo.length){
                 resumo = aumentarMatrizGenerico(resumo);
-                //TODO apagar DEBUG
-                System.out.printf("DEBUG matriz aumentada %d %n ",resumo.length);
             }
 
             qtd = 0;
 
         }
-
 
         return resumo;
     }
